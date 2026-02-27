@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake Review Detector</title>
+  <style>
+    body { font-family: Arial; background: #f6f8ff; text-align: center; padding: 40px; }
+    textarea { width: 60%; height: 150px; padding: 10px; border-radius: 10px; border: 2px solid #bbb; }
+    button { padding: 12px 25px; margin-top: 10px; font-size: 18px; background: #6a5acd; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #4f43a3; }
+    #result { font-size: 25px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<h1>Fake Review Detector 🔍</h1>
+
+<textarea id="review" placeholder="Paste a review..."></textarea><br>
+<button onclick="analyze()">Analyze Review</button>
+
+<h2 id="result"></h2>
+<p id="confidence"></p>
+
+<script>
+async function analyze() {
+    const review = document.getElementById("review").value;
+
+    const res = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("result").innerHTML = "Result: " + data.label;
+    document.getElementById("confidence").innerHTML = "Confidence: " + (data.confidence * 100).toFixed(2) + "%";
+}
+</script>
+
+</body>
+</html>
