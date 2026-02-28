@@ -1,13 +1,17 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import pickle
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # Load model
-model = pickle.load(open("../model/model.pkl", "rb"))
-vectorizer = pickle.load(open("../model/vectorizer.pkl", "rb"))
+model = pickle.load(open("model.pkl", "rb"))
+vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+
+@app.route("/")
+def home():
+    return render_template("index.html")   # Serve the frontend
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -17,7 +21,10 @@ def predict():
     if not review.strip():
         return jsonify({"error": "Review cannot be empty"}), 400
 
+    # Vectorize input
     vec = vectorizer.transform([review])
+
+    # Predict
     pred = model.predict(vec)[0]
     prob = model.predict_proba(vec)[0]
 
@@ -27,4 +34,4 @@ def predict():
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
